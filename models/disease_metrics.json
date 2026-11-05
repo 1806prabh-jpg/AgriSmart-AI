@@ -1,0 +1,8 @@
+{
+    "classes": 39,
+    "selected_images": 11527,
+    "training_images": 9221,
+    "validation_images": 2306,
+    "final_training_accuracy": 0.9578136801719666,
+    "final_validation_accuracy": 0.9449262619018555
+}

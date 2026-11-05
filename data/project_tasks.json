@@ -1,0 +1,47 @@
+[
+    {
+        "task": "Crop recommendation model",
+        "module": "Crop Recommendation",
+        "status": "Done"
+    },
+    {
+        "task": "Weather advisory module",
+        "module": "Weather Advisory",
+        "status": "Done"
+    },
+    {
+        "task": "Plant disease detection model",
+        "module": "Disease Detection",
+        "status": "Done"
+    },
+    {
+        "task": "Market analysis module",
+        "module": "Market Analysis",
+        "status": "In Progress"
+    },
+    {
+        "task": "Disease examples and guidance gallery",
+        "module": "Disease Detection",
+        "status": "In Progress"
+    },
+    {
+        "task": "Live mandi data integration",
+        "module": "Market Analysis",
+        "status": "Pending"
+    },
+    {
+        "task": "Project radar and task tracker",
+        "module": "Project Dashboard",
+        "status": "In Progress"
+    },
+    {
+        "task": "Final system testing",
+        "module": "Project Dashboard",
+        "status": "In Progress"
+    },
+    {
+        "task": "README and documentation",
+        "module": "Project Dashboard",
+        "status": "Done"
+    }
+]

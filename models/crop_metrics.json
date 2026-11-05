@@ -1,0 +1,7 @@
+{
+    "accuracy": 0.9931818181818182,
+    "training_samples": 1760,
+    "testing_samples": 440,
+    "number_of_features": 7,
+    "number_of_crops": 22
+}
