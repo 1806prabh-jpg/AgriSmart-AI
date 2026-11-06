@@ -1,3 +1,5 @@
+🚀 **[OPEN LIVE PROTOTYPE – AgriSmart AI](https://agrismart-ai-5h8xiugd8c5z2eisd2vqur.streamlit.app/)**
+
 # AI Crop Advisory & Farmer Decision Support System
 
 ## 1. Project Overview
