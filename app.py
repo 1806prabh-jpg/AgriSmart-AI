@@ -1,4 +1,3 @@
-
 import json
 import re
 from pathlib import Path
@@ -35,6 +34,8 @@ DATA_DIR = BASE_DIR / "data"
 PLANT_VILLAGE_DIR = DATA_DIR / "plant_village"
 
 TASK_FILE = DATA_DIR / "project_tasks.json"
+TEAM_FILE = DATA_DIR / "team_members.json"
+SETTINGS_FILE = DATA_DIR / "app_settings.json"
 
 HERO_IMAGE = (
     "https://images.unsplash.com/photo-1500382017468-9049fed747ef"
@@ -249,59 +250,79 @@ DISEASE_INFO = {
 
 
 # ============================================================
-# 3. PROJECT TASK TRACKER
+# 3. LOCAL DATA STORAGE HELPERS
+# ============================================================
+
+def load_json_file(file_path, default_value):
+    """Read a JSON file safely and return a default if unavailable."""
+    try:
+        if not file_path.exists():
+            return default_value
+
+        with open(file_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+
+    except (OSError, json.JSONDecodeError, TypeError):
+        return default_value
+
+
+def save_json_file(file_path, data):
+    """Save JSON safely using a temporary file."""
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    temporary_path = file_path.with_suffix(file_path.suffix + ".tmp")
+
+    with open(temporary_path, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4, ensure_ascii=False)
+
+    temporary_path.replace(file_path)
+
+
+# ============================================================
+# 4. PROJECT TASK TRACKER
 # ============================================================
 
 INITIAL_TASKS = [
-
     {
         "task": "Crop recommendation model",
         "module": "Crop Recommendation",
         "status": "Done"
     },
-
     {
         "task": "Weather advisory module",
         "module": "Weather Advisory",
         "status": "Done"
     },
-
     {
         "task": "Plant disease detection model",
         "module": "Disease Detection",
         "status": "Done"
     },
-
     {
         "task": "Market analysis module",
         "module": "Market Analysis",
         "status": "In Progress"
     },
-
     {
         "task": "Disease examples and guidance gallery",
         "module": "Disease Detection",
         "status": "In Progress"
     },
-
     {
         "task": "Live mandi data integration",
         "module": "Market Analysis",
         "status": "Pending"
     },
-
     {
         "task": "Project radar and task tracker",
         "module": "Project Dashboard",
         "status": "In Progress"
     },
-
     {
         "task": "Final system testing",
         "module": "Project Dashboard",
         "status": "In Progress"
     },
-
     {
         "task": "README and documentation",
         "module": "Project Dashboard",
@@ -312,7 +333,6 @@ INITIAL_TASKS = [
 
 def load_tasks():
     """Load saved tasks or create the initial task list."""
-
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     if not TASK_FILE.exists():
@@ -334,22 +354,17 @@ def load_tasks():
 
 def save_tasks(tasks):
     """Save project tasks to a local JSON file."""
-
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-    with open(TASK_FILE, "w", encoding="utf-8") as file:
-        json.dump(tasks, file, indent=4)
+    save_json_file(TASK_FILE, tasks)
 
 
 # ============================================================
-# 4. DISEASE DATASET IMAGE FINDER
+# 5. DISEASE DATASET IMAGE FINDER
 # ============================================================
 
 @st.cache_data
 def find_disease_images():
     """
     Find representative images from the downloaded PlantVillage dataset.
-    Uses the original dataset images, not generated images.
     """
 
     found = {}
@@ -382,7 +397,7 @@ def find_disease_images():
 
 
 # ============================================================
-# 5. MODEL LOADING
+# 6. MODEL LOADING
 # ============================================================
 
 @st.cache_resource
@@ -400,422 +415,351 @@ def load_crop_metrics():
 
 
 # ============================================================
-# 6. PROFESSIONAL FRONTEND CSS
+# 7. PROFESSIONAL FRONTEND CSS
 # ============================================================
 
 st.markdown("""
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
 
-:root {
-    --green-dark: #103b2b;
-    --green-main: #18794e;
-    --green-light: #e9f5ed;
-    --text-dark: #183c2b;
-    --text-muted: #63796b;
-    --background: #f3f7f3;
-    --white: #ffffff;
-    --border: #dce9df;
+:root{
+    --forest:#183B2B;
+    --green:#64845A;
+    --cream:#F5F4EC;
+    --ink:#26352B;
+    --muted:#758075;
+    --line:#E3E7DD;
+    --white:#FFFFFF;
 }
 
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
+html,body,[class*="css"]{
+    font-family:'DM Sans',sans-serif;
 }
 
-.stApp {
-    background: var(--background);
-    color: var(--text-dark);
+.stApp{
+    background:var(--cream);
+    color:var(--ink);
 }
 
-.block-container {
-    max-width: 1450px;
-    padding-top: 1.6rem;
-    padding-bottom: 3rem;
+.block-container{
+    max-width:1480px;
+    padding-top:1.7rem;
+    padding-bottom:3rem;
 }
 
-header[data-testid="stHeader"] {
-    background: transparent;
+header[data-testid="stHeader"]{
+    background:transparent;
 }
 
-h1, h2, h3, h4 {
-    font-family: 'Manrope', sans-serif !important;
-    color: var(--green-dark) !important;
-    font-weight: 800 !important;
+h1,h2,h3,h4{
+    font-family:'Manrope',sans-serif!important;
+    color:var(--forest)!important;
+    font-weight:800!important;
 }
 
-p, li {
-    color: var(--text-dark);
+p,li{
+    color:var(--ink);
 }
 
-
-/* SIDEBAR */
-
-[data-testid="stSidebar"] {
-    background: linear-gradient(
-        180deg,
-        #0a2d20 0%,
-        #103b2b 55%,
-        #15543a 100%
-    );
-    border-right: 1px solid #245b40;
+[data-testid="stSidebar"]{
+    background:var(--forest);
+    border-right:1px solid #31523D;
 }
 
-[data-testid="stSidebar"] > div:first-child {
-    padding-top: 1.3rem;
+[data-testid="stSidebar"] *{
+    color:#F4F7F1!important;
 }
 
-[data-testid="stSidebar"] * {
-    color: #ffffff !important;
+[data-testid="stSidebar"] hr{
+    border-color:rgba(255,255,255,.16);
 }
 
-[data-testid="stSidebar"] hr {
-    border-color: rgba(255,255,255,0.17);
+[data-testid="stSidebar"] .stButton{
+    margin:0 0 4px 0;
 }
 
-[data-testid="stSidebar"] [role="radiogroup"] {
-    gap: 9px;
+[data-testid="stSidebar"] .stButton>button{
+    background:transparent!important;
+    border:1px solid transparent!important;
+    color:#EAF1E8!important;
+    text-align:left!important;
+    justify-content:flex-start!important;
+    padding:9px 12px!important;
+    min-height:39px!important;
+    font-weight:600!important;
 }
 
-[data-testid="stSidebar"] [role="radiogroup"] label {
-    padding: 11px 12px;
-    border-radius: 11px;
-    border: 1px solid rgba(255,255,255,0.07);
-    background: rgba(255,255,255,0.045);
-    transition: all 0.25s ease;
-    cursor: pointer;
+[data-testid="stSidebar"] .stButton>button:hover{
+    background:rgba(255,255,255,.10)!important;
+    border-color:rgba(255,255,255,.14)!important;
+    transform:none!important;
+    box-shadow:none!important;
 }
 
-[data-testid="stSidebar"] [role="radiogroup"] label:hover {
-    background: #245f41;
-    border-color: #7dc99a;
-    transform: translateX(4px);
+[data-testid="stSidebar"] .stButton>button[kind="primary"]{
+    background:#315D40!important;
+    border-color:#739477!important;
+    color:#FFFFFF!important;
 }
 
-[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
-    background: #23764b;
-    border: 1px solid #91d9aa;
+.nav-group-label{
+    font-size:10px;
+    letter-spacing:1.4px;
+    font-weight:800;
+    color:#AFC8B2;
+    padding:15px 10px 7px;
+    text-transform:uppercase;
 }
 
-[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    color: #e1f0e5 !important;
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p{
+    color:#DCE8DC!important;
 }
 
-
-/* BUTTONS */
-
-.stButton > button,
-.stFormSubmitButton > button {
-    background: linear-gradient(145deg, #258d5b, #12623d) !important;
-    color: #ffffff !important;
-    border: 1px solid #2b9866 !important;
-    border-radius: 11px !important;
-    font-weight: 800 !important;
-    min-height: 45px;
-    padding: 10px 20px !important;
-    box-shadow: 0 5px 0 #0a492c, 0 8px 17px rgba(15,80,48,0.16) !important;
-    transition: all 0.18s ease !important;
+.stButton>button,.stFormSubmitButton>button{
+    background:var(--forest)!important;
+    color:#fff!important;
+    border:1px solid #315D40!important;
+    border-radius:9px!important;
+    font-weight:700!important;
+    min-height:42px;
+    transition:all .18s ease!important;
 }
 
-.stButton > button:hover,
-.stFormSubmitButton > button:hover {
-    background: linear-gradient(145deg, #31a76c, #18794e) !important;
-    color: white !important;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 0 #0a492c, 0 13px 23px rgba(15,80,48,0.22) !important;
+.stButton>button:hover,.stFormSubmitButton>button:hover{
+    background:#315D40!important;
+    transform:translateY(-1px);
+    box-shadow:0 5px 12px rgba(24,59,43,.14)!important;
 }
 
-.stButton > button:active,
-.stFormSubmitButton > button:active {
-    transform: translateY(3px) scale(0.98) !important;
+.stTextInput input,.stNumberInput input,.stTextArea textarea{
+    background:#fff!important;
+    color:var(--ink)!important;
+    border:1px solid #D6DED3!important;
+    border-radius:8px!important;
 }
 
-
-/* INPUTS */
-
-.stTextInput input,
-.stNumberInput input,
-.stTextArea textarea {
-    background: #ffffff !important;
-    color: #183c2b !important;
-    border: 1px solid #cbdccf !important;
-    border-radius: 9px !important;
+.stTextInput label,.stNumberInput label,.stSelectbox label,.stFileUploader label{
+    color:#405B46!important;
+    font-weight:700!important;
 }
 
-.stTextInput label,
-.stNumberInput label,
-.stSelectbox label,
-.stFileUploader label {
-    color: #315b40 !important;
-    font-weight: 700 !important;
+div[data-baseweb="select"]>div{
+    background:#fff!important;
+    color:var(--ink)!important;
+    border-radius:8px!important;
 }
 
-div[data-baseweb="select"] > div {
-    background: #ffffff !important;
-    color: #183c2b !important;
-    border-radius: 9px !important;
+div[data-testid="stForm"]{
+    background:#fff!important;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:20px;
+    box-shadow:0 4px 14px rgba(24,59,43,.035);
 }
 
-
-/* FORMS */
-
-div[data-testid="stForm"] {
-    background: #ffffff !important;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: 0 5px 18px rgba(20,60,35,0.04);
+.hero{
+    background:linear-gradient(90deg,rgba(14,43,29,.90),rgba(14,43,29,.30)),
+    url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=85");
+    background-size:cover;
+    background-position:center;
+    min-height:260px;
+    border-radius:18px;
+    padding:36px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    margin-bottom:24px;
 }
 
-
-/* HERO */
-
-.hero {
-    background:
-        linear-gradient(90deg, rgba(5,31,19,0.94), rgba(5,31,19,0.30)),
-        url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1800&q=85");
-    background-size: cover;
-    background-position: center;
-    min-height: 275px;
-    border-radius: 22px;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    box-shadow: 0 12px 30px rgba(20,60,35,0.13);
-    margin-bottom: 25px;
+.hero h1{
+    color:#fff!important;
+    font-size:38px;
+    line-height:1.2;
+    max-width:700px;
 }
 
-.hero h1 {
-    color: #ffffff !important;
-    font-size: 39px;
-    font-weight: 800;
-    max-width: 700px;
-    line-height: 1.2;
+.hero p{
+    color:#F0F4EC!important;
+    font-size:15px;
+    max-width:660px;
 }
 
-.hero p {
-    color: #edf8ef !important;
-    font-size: 15px;
-    max-width: 650px;
+.eyebrow{
+    color:#D4E2C9!important;
+    font-weight:700;
+    letter-spacing:1.5px;
+    font-size:11px;
 }
 
-.eyebrow {
-    color: #a9edbd !important;
-    font-weight: 800;
-    letter-spacing: 2px;
-    font-size: 12px;
+.section-title{
+    font-family:'Manrope',sans-serif;
+    font-size:24px;
+    font-weight:800;
+    color:var(--forest);
+    margin-top:18px;
+    margin-bottom:5px;
 }
 
-
-/* HEADINGS */
-
-.section-title {
-    font-family: 'Manrope', sans-serif;
-    font-size: 25px;
-    font-weight: 800;
-    color: #17452e;
-    margin-top: 20px;
-    margin-bottom: 5px;
+.section-subtitle{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:18px;
 }
 
-.section-subtitle {
-    color: #6c8375;
-    font-size: 14px;
-    margin-bottom: 20px;
+.stat-card,.feature-card,.info-panel{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:0 3px 12px rgba(24,59,43,.035);
+    transition:transform .18s ease,box-shadow .18s ease;
 }
 
-
-/* CARDS */
-
-.stat-card {
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 19px;
-    min-height: 115px;
-    box-shadow: 0 5px 18px rgba(20,60,35,0.045);
-    transition: all 0.25s ease;
+.stat-card{
+    padding:18px;
+    min-height:112px;
 }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(20,60,35,0.11);
+.stat-card:hover,.feature-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 9px 20px rgba(24,59,43,.08);
 }
 
-.stat-label {
-    color: #647c6c;
-    font-size: 13px;
-    font-weight: 700;
+.stat-label{
+    color:#758075;
+    font-size:12px;
+    font-weight:700;
 }
 
-.stat-value {
-    color: #17653e;
-    font-size: 29px;
-    font-weight: 800;
-    margin-top: 9px;
+.stat-value{
+    color:var(--forest);
+    font-size:28px;
+    font-weight:800;
+    margin-top:8px;
 }
 
-.stat-note {
-    color: #708577;
-    font-size: 12px;
+.stat-note{
+    color:var(--muted);
+    font-size:11px;
 }
 
-.feature-card {
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 5px 18px rgba(20,60,35,0.05);
-    transition: all 0.25s ease;
-    margin-bottom: 18px;
+.feature-card{
+    overflow:hidden;
+    margin-bottom:16px;
 }
 
-.feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px rgba(20,60,35,0.12);
+.feature-card img{
+    width:100%;
+    height:145px;
+    object-fit:cover;
 }
 
-.feature-card img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
+.feature-content{
+    padding:14px;
 }
 
-.feature-content {
-    padding: 15px;
+.feature-content h3{
+    font-size:16px;
+    margin:0 0 6px;
 }
 
-.feature-content h3 {
-    color: #17452e !important;
-    font-size: 17px;
-    margin-bottom: 6px;
+.feature-content p{
+    color:var(--muted)!important;
+    font-size:13px;
+    margin:0;
 }
 
-.feature-content p {
-    color: #718477 !important;
-    font-size: 13px;
+.info-panel{
+    padding:18px;
+    margin-bottom:14px;
 }
 
-
-/* IMAGES */
-
-div[data-testid="stImage"] {
-    overflow: hidden;
-    border-radius: 14px;
-    margin-bottom: 8px;
+.info-panel h3{
+    color:var(--forest)!important;
+    font-size:17px;
 }
 
-div[data-testid="stImage"] img {
-    border-radius: 14px;
+.info-panel p,.info-panel li{
+    color:#405B46!important;
 }
 
-
-/* INFORMATION PANELS */
-
-.info-panel {
-    background: #ffffff !important;
-    color: #183c2b !important;
-    border: 1px solid var(--border);
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 5px 17px rgba(20,60,35,0.045);
+div[data-testid="stImage"]{
+    overflow:hidden;
+    border-radius:12px;
+    margin-bottom:8px;
 }
 
-.info-panel h3 {
-    color: #17653e !important;
+div[data-testid="stImage"] img{
+    border-radius:12px;
 }
 
-.info-panel p,
-.info-panel li {
-    color: #315b40 !important;
+div[data-testid="stMetric"]{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:15px;
 }
 
-
-/* METRICS */
-
-div[data-testid="stMetric"] {
-    background: #ffffff !important;
-    border: 1px solid #dce9df;
-    border-radius: 14px;
-    padding: 17px;
-    box-shadow: 0 5px 15px rgba(20,60,35,0.045);
+div[data-testid="stMetric"] label{
+    color:#667568!important;
 }
 
-div[data-testid="stMetric"] label {
-    color: #526b5a !important;
+div[data-testid="stMetric"] [data-testid="stMetricValue"]{
+    color:var(--forest)!important;
+    font-weight:800!important;
 }
 
-div[data-testid="stMetric"] [data-testid="stMetricValue"] {
-    color: #145b37 !important;
-    font-weight: 800 !important;
-}
-
-
-/* ALERTS */
-
-div[data-testid="stAlert"] {
-    background: #ffffff !important;
-    color: #183c2b !important;
-    border: 1px solid #d8e8dc !important;
-    border-radius: 13px !important;
+div[data-testid="stAlert"]{
+    background:#fff!important;
+    color:var(--ink)!important;
+    border:1px solid var(--line)!important;
+    border-radius:11px!important;
 }
 
 div[data-testid="stAlert"] p,
 div[data-testid="stAlert"] span,
-div[data-testid="stAlert"] li {
-    color: #183c2b !important;
+div[data-testid="stAlert"] li{
+    color:var(--ink)!important;
 }
 
-
-/* TABLES AND PROGRESS */
-
-div[data-testid="stDataFrame"] {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+div[data-testid="stDataFrame"]{
+    border:1px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
 }
 
-div[data-testid="stProgress"] > div > div {
-    background: #198653 !important;
+div[data-testid="stProgress"]>div>div{
+    background:#64845A!important;
 }
 
-
-/* FILE UPLOAD */
-
-[data-testid="stFileUploader"] {
-    background: #ffffff;
-    border: 1px dashed #a8cbb1;
-    border-radius: 13px;
-    padding: 12px;
+[data-testid="stFileUploader"]{
+    background:#fff;
+    border:1px dashed #B9C8B5;
+    border-radius:11px;
+    padding:10px;
 }
 
-
-/* FOOTER */
-
-.footer {
-    text-align: center;
-    color: #718779;
-    padding: 25px;
-    font-size: 12px;
+.footer{
+    text-align:center;
+    color:#7A857A;
+    padding:24px;
+    font-size:12px;
+    border-top:1px solid var(--line);
+    margin-top:28px;
 }
 
-
-/* MOBILE */
-
-@media (max-width: 768px) {
-    .hero {
-        min-height: 220px;
-        padding: 24px;
+@media(max-width:768px){
+    .hero{
+        min-height:210px;
+        padding:22px;
     }
 
-    .hero h1 {
-        font-size: 28px;
+    .hero h1{
+        font-size:28px;
     }
 
-    .section-title {
-        font-size: 21px;
+    .section-title{
+        font-size:21px;
     }
 }
 
@@ -823,11 +767,60 @@ div[data-testid="stProgress"] > div > div {
 """, unsafe_allow_html=True)
 
 
+# Load saved preferences once per Streamlit session.
+
+DEFAULT_SETTINGS = {
+    "preferred_language": "English",
+    "display_density": "Comfortable"
+}
+
+if "app_settings" not in st.session_state:
+
+    saved_settings = load_json_file(
+        SETTINGS_FILE,
+        DEFAULT_SETTINGS.copy()
+    )
+
+    if not isinstance(saved_settings, dict):
+        saved_settings = DEFAULT_SETTINGS.copy()
+
+    st.session_state.app_settings = {
+        **DEFAULT_SETTINGS,
+        **saved_settings
+    }
+
+
+if st.session_state.app_settings.get("display_density") == "Compact":
+
+    st.markdown("""
+    <style>
+    .block-container{
+        padding-top:1rem!important;
+        padding-bottom:1.5rem!important;
+    }
+
+    div[data-testid="stMetric"]{
+        padding:10px!important;
+    }
+
+    .stat-card{
+        padding:13px!important;
+        min-height:96px!important;
+    }
+
+    div[data-testid="stVerticalBlock"]{
+        gap:.75rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 # ============================================================
-# 7. REUSABLE UI FUNCTIONS
+# 8. REUSABLE UI FUNCTIONS
 # ============================================================
 
 def section_heading(title, subtitle):
+
     st.markdown(
         f"""
         <div class="section-title">{title}</div>
@@ -838,6 +831,7 @@ def section_heading(title, subtitle):
 
 
 def feature_card(image_url, title, description):
+
     st.markdown(
         f"""
         <div class="feature-card">
@@ -853,6 +847,7 @@ def feature_card(image_url, title, description):
 
 
 def information_panel(title, content):
+
     st.markdown(
         f"""
         <div class="info-panel">
@@ -865,6 +860,7 @@ def information_panel(title, content):
 
 
 def get_module_progress(tasks):
+
     """Calculate module progress from saved task statuses."""
 
     status_values = {
@@ -899,96 +895,145 @@ def get_module_progress(tasks):
             progress[module] = sum(scores) / len(scores)
 
         else:
+
             progress[module] = 0
 
     return progress
+# ============================================================
+# 9. SIDEBAR NAVIGATION
+# ============================================================
+
+NAVIGATION_GROUPS = {
+    "OVERVIEW": ["🏠 Dashboard"],
+
+    "FARM INTELLIGENCE": [
+        "🌾 Crop Recommendation",
+        "🌦️ Weather Advisory",
+        "🍃 Disease Detection"
+    ],
+
+    "MARKET & ANALYTICS": [
+        "📈 Market Analysis",
+        "📡 Project Tasks & Radar",
+        "📄 Reports"
+    ],
+
+    "WORKSPACE": [
+        "👥 Team",
+        "❔ Help & Support"
+    ],
+
+    "SYSTEM": [
+        "⚙️ Settings",
+        "ℹ️ About Project"
+    ]
+}
 
 
-# ============================================================
-# 8. SIDEBAR NAVIGATION
-# ============================================================
+def set_active_page(page_name):
+    st.session_state.active_page = page_name
+
+
+if "active_page" not in st.session_state:
+    st.session_state.active_page = "🏠 Dashboard"
+
 
 with st.sidebar:
 
     st.markdown(
         """
-        <div style="padding:15px 5px 22px 5px;">
-            <div style="font-size:38px;">🌱</div>
-            <h2 style="color:white !important;margin:0;">
+        <div style="padding:14px 7px 18px 7px;">
+            <div style="font-size:34px;">🌱</div>
+            <div style="font-size:23px;font-weight:800;color:#FFFFFF;">
                 AgriSmart AI
-            </h2>
-            <p style="font-size:11px;color:#c1ddc9 !important;
-            letter-spacing:1.5px;">
+            </div>
+            <div style="font-size:10px;color:#C1DDC9;
+                        letter-spacing:1.35px;margin-top:3px;">
                 INTELLIGENT FARMING PLATFORM
-            </p>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
     )
 
     st.markdown("---")
-    st.markdown("### NAVIGATION")
 
-    page = st.radio(
-        "Navigate",
-        [
-            "🏠 Dashboard",
-            "📡 Project Radar & Tasks",
-            "🌾 Crop Recommendation",
-            "🌦️ Weather Advisory",
-            "🍃 Disease Detection",
-            "📈 Market Analysis",
-            "ℹ️ About Project"
-        ],
-        label_visibility="collapsed"
-    )
+    for group_name, pages in NAVIGATION_GROUPS.items():
+
+        st.markdown(
+            f'<div class="nav-group-label">{group_name}</div>',
+            unsafe_allow_html=True
+        )
+
+        for page_name in pages:
+
+            st.button(
+                page_name,
+                key=f"navigation_{page_name}",
+                type=(
+                    "primary"
+                    if st.session_state.active_page == page_name
+                    else "secondary"
+                ),
+                use_container_width=True,
+                on_click=set_active_page,
+                args=(page_name,)
+            )
 
     st.markdown("---")
-    st.markdown("### SYSTEM INFORMATION")
 
     st.markdown(
-        """
-        <div style="background:rgba(255,255,255,0.08);
-        padding:13px;border-radius:12px;margin-bottom:8px;">
-            <span style="color:#a7e6b7;">●</span>
-            <b>Crop model</b><br>
-            <small>Random Forest</small>
-        </div>
-
-        <div style="background:rgba(255,255,255,0.08);
-        padding:13px;border-radius:12px;margin-bottom:8px;">
-            <span style="color:#a7e6b7;">●</span>
-            <b>Disease model</b><br>
-            <small>MobileNetV2</small>
-        </div>
-
-        <div style="background:rgba(255,255,255,0.08);
-        padding:13px;border-radius:12px;margin-bottom:8px;">
-            <span style="color:#a7e6b7;">●</span>
-            <b>Weather service</b><br>
-            <small>Open-Meteo</small>
-        </div>
-
-        <div style="background:rgba(255,255,255,0.08);
-        padding:13px;border-radius:12px;">
-            <span style="color:#a7e6b7;">●</span>
-            <b>Market analysis</b><br>
-            <small>CSV and sample data</small>
-        </div>
-        """,
+        "<div class='nav-group-label'>SYSTEM STATUS</div>",
         unsafe_allow_html=True
     )
 
+    status_items = [
+        ("Crop model", "Random Forest"),
+        ("Disease model", "MobileNetV2"),
+        ("Weather service", "Open-Meteo"),
+        ("Market analysis", "CSV + sample data")
+    ]
+
+    for status_title, status_detail in status_items:
+
+        st.markdown(
+            f"""
+            <div style="background:rgba(255,255,255,.08);
+                        padding:10px 12px;border-radius:9px;
+                        margin-bottom:7px;">
+                <div style="font-size:12px;font-weight:700;color:#FFFFFF;">
+                    ● {status_title}
+                </div>
+                <div style="font-size:11px;color:#C1DDC9;margin-left:14px;">
+                    {status_detail}
+                </div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
     st.markdown("---")
-    st.caption("AI Crop Advisory System")
+    st.caption("AI Crop Advisory & Farmer Decision Support System")
     st.caption("Smart India Hackathon Project")
 
 
+page = st.session_state.active_page
+
+
 # ============================================================
-# 9. LOAD PROJECT TASKS
+# 10. LOAD PROJECT TASKS
 # ============================================================
 
 tasks = load_tasks()
+
+if "team_members" not in st.session_state:
+
+    saved_team = load_json_file(TEAM_FILE, [])
+
+    st.session_state.team_members = (
+        saved_team if isinstance(saved_team, list) else []
+    )
+
 
 done_count = sum(
     1 for task in tasks
@@ -1006,7 +1051,7 @@ progress_count = sum(
 )
 
 overall_progress = (
-    done_count / len(tasks) * 100
+    (done_count + progress_count * 0.5) / len(tasks) * 100
     if tasks else 0
 )
 
@@ -1014,7 +1059,7 @@ module_progress = get_module_progress(tasks)
 
 
 # ============================================================
-# 10. MAIN DASHBOARD
+# 11. MAIN DASHBOARD
 # ============================================================
 
 if page == "🏠 Dashboard":
@@ -1049,7 +1094,7 @@ if page == "🏠 Dashboard":
     c1, c2, c3, c4 = st.columns(4)
 
     cards = [
-        ("04", "AI Modules", "Integrated project modules"),
+        ("04", "Advisory Modules", "2 trained models + 2 data services"),
         ("22", "Crop Classes", "Crop recommendation categories"),
         ("39", "Disease Classes", "Disease classification categories"),
         (f"{overall_progress:.0f}%", "Project Progress", "Based on task statuses")
@@ -1058,6 +1103,7 @@ if page == "🏠 Dashboard":
     for col, (value, label, note) in zip(
         [c1, c2, c3, c4], cards
     ):
+
         with col:
             st.markdown(
                 f"""
@@ -1084,7 +1130,8 @@ if page == "🏠 Dashboard":
     st.progress(overall_progress / 100)
 
     st.caption(
-        f"{done_count} of {len(tasks)} tasks marked as completed."
+        f"Weighted project progress: {overall_progress:.0f}% "
+        "(Done = 100%, In Progress = 50%, Pending = 0%)."
     )
 
     section_heading(
@@ -1133,10 +1180,10 @@ if page == "🏠 Dashboard":
 
 
 # ============================================================
-# 11. PROJECT RADAR AND TASK TRACKER
+# 12. PROJECT RADAR AND TASK TRACKER
 # ============================================================
 
-elif page == "📡 Project Radar & Tasks":
+elif page == "📡 Project Tasks & Radar":
 
     section_heading(
         "Project Radar & Task Management",
@@ -1180,6 +1227,7 @@ elif page == "📡 Project Radar & Tasks":
     ]
 
     radar_values_closed = radar_values + [radar_values[0]]
+
     angles = np.linspace(
         0,
         2 * np.pi,
@@ -1366,8 +1414,6 @@ elif page == "📡 Project Radar & Tasks":
     st.caption(
         "Task information is stored locally in data/project_tasks.json."
     )
-
-
 # ============================================================
 # 12. CROP RECOMMENDATION
 # ============================================================
@@ -1837,6 +1883,7 @@ elif page == "🍃 Disease Detection":
                         )
 
                         # Find matching disease guidance
+
                         normalized_condition = re.sub(
                             r"[^a-z0-9]+",
                             "",
@@ -1926,9 +1973,7 @@ elif page == "🍃 Disease Detection":
         except Exception as e:
 
             st.error(f"Disease detection error: {e}")
-
-
-# ============================================================
+            # ============================================================
 # 15. MARKET ANALYSIS
 # ============================================================
 
@@ -2107,7 +2152,405 @@ elif page == "📈 Market Analysis":
 
 
 # ============================================================
-# 16. ABOUT PROJECT
+# 16. TEAM, REPORTS, SETTINGS AND SUPPORT
+# ============================================================
+
+elif page == "👥 Team":
+
+    section_heading(
+        "Team Workspace",
+        "Keep your project contributors, responsibilities and contributions organised."
+    )
+
+    st.info(
+        "Add your actual project members below. "
+        "The application does not create fictional team profiles."
+    )
+
+    with st.form("team_member_form", clear_on_submit=True):
+
+        st.subheader("Add a team member")
+
+        member_name = st.text_input(
+            "Full name",
+            placeholder="Enter the member's name"
+        )
+
+        member_role = st.selectbox(
+            "Project role",
+            [
+                "Project Lead",
+                "Machine Learning Developer",
+                "Backend Developer",
+                "Frontend Developer",
+                "Data & Research",
+                "Documentation & Testing",
+                "Other"
+            ]
+        )
+
+        member_contribution = st.text_area(
+            "Contribution / responsibility",
+            placeholder="Describe the work handled by this member",
+            height=90
+        )
+
+        add_member = st.form_submit_button(
+            "＋ Add team member",
+            use_container_width=True
+        )
+
+    if add_member:
+
+        cleaned_name = member_name.strip()
+
+        if not cleaned_name:
+
+            st.warning("Please enter the member's name.")
+
+        elif any(
+            m.get("name", "").casefold() == cleaned_name.casefold()
+            for m in st.session_state.team_members
+        ):
+
+            st.warning("A team member with this name already exists.")
+
+        else:
+
+            st.session_state.team_members.append({
+                "name": cleaned_name,
+                "role": member_role,
+                "contribution": member_contribution.strip() or "Not specified"
+            })
+
+            save_json_file(
+                TEAM_FILE,
+                st.session_state.team_members
+            )
+
+            st.success("Team member saved successfully.")
+            st.rerun()
+
+    st.markdown("---")
+    st.subheader("Current project team")
+
+    members = st.session_state.team_members
+
+    if members:
+
+        st.metric("Team members", len(members))
+
+        st.dataframe(
+            pd.DataFrame(members),
+            use_container_width=True,
+            hide_index=True
+        )
+
+        team_csv = (
+            pd.DataFrame(members)
+            .to_csv(index=False)
+            .encode("utf-8")
+        )
+
+        st.download_button(
+            "Download team directory (CSV)",
+            team_csv,
+            "agrismart_team.csv",
+            "text/csv",
+            use_container_width=True
+        )
+
+        st.subheader("Remove a member")
+
+        member_names = [
+            m.get("name", "Unnamed")
+            for m in members
+        ]
+
+        selected_member = st.selectbox(
+            "Select member",
+            member_names,
+            key="remove_team_member"
+        )
+
+        if st.button("Remove selected member", type="secondary"):
+
+            remove_index = member_names.index(selected_member)
+
+            st.session_state.team_members.pop(remove_index)
+
+            save_json_file(
+                TEAM_FILE,
+                st.session_state.team_members
+            )
+
+            st.success("Team member removed.")
+            st.rerun()
+
+    else:
+
+        st.markdown(
+            """
+            <div class='info-panel'>
+                <h3>No team members added yet</h3>
+                Use the form above to add your real project contributors.
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    st.caption(
+        "Team information is saved locally in data/team_members.json "
+        "and remains available after restarting the app on the same installation."
+    )
+
+
+elif page == "📄 Reports":
+
+    section_heading(
+        "Reports & Exports",
+        "Download project progress and model evaluation information."
+    )
+
+    report_tasks = pd.DataFrame(tasks)
+
+    st.subheader("Project task report")
+
+    st.dataframe(
+        report_tasks,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.download_button(
+        "Download task report (CSV)",
+        report_tasks.to_csv(index=False).encode("utf-8"),
+        "agrismart_project_tasks.csv",
+        "text/csv",
+        use_container_width=True
+    )
+
+    st.subheader("Model evaluation summary")
+
+    crop_metrics = load_crop_metrics()
+
+    metrics_payload = {
+        "crop_model": crop_metrics,
+        "disease_model": {},
+        "project_task_summary": {
+            "total": len(tasks),
+            "done": done_count,
+            "in_progress": progress_count,
+            "pending": pending_count,
+            "weighted_progress_percent": round(
+                overall_progress,
+                2
+            )
+        }
+    }
+
+    disease_metrics_path = (
+        BASE_DIR / "models" / "disease_metrics.json"
+    )
+
+    if disease_metrics_path.exists():
+
+        try:
+
+            with open(
+                disease_metrics_path,
+                "r",
+                encoding="utf-8"
+            ) as metric_file:
+
+                metrics_payload["disease_model"] = json.load(
+                    metric_file
+                )
+
+        except (OSError, json.JSONDecodeError):
+
+            st.warning("Disease metrics file could not be read.")
+
+    st.json(metrics_payload)
+
+    st.download_button(
+        "Download project report (JSON)",
+        json.dumps(
+            metrics_payload,
+            indent=4
+        ).encode("utf-8"),
+        "agrismart_project_report.json",
+        "application/json",
+        use_container_width=True
+    )
+
+    st.caption(
+        "Reports contain the metrics and task data currently available "
+        "in the project; they do not represent live market or farm outcomes."
+    )
+elif page == "⚙️ Settings":
+
+    section_heading(
+        "Application Settings",
+        "Manage display preferences for your AgriSmart AI workspace."
+    )
+
+    current_settings = st.session_state.app_settings
+
+    language_options = [
+        "English",
+        "Punjabi (planned)",
+        "Hindi (planned)"
+    ]
+
+    density_options = [
+        "Comfortable",
+        "Compact"
+    ]
+
+    with st.form("settings_form"):
+
+        st.subheader("Display preferences")
+
+        preferred_language = st.selectbox(
+            "Preferred language",
+            language_options,
+            index=(
+                language_options.index(
+                    current_settings.get(
+                        "preferred_language",
+                        "English"
+                    )
+                )
+                if current_settings.get(
+                    "preferred_language",
+                    "English"
+                ) in language_options
+                else 0
+            )
+        )
+
+        display_density = st.selectbox(
+            "Display density",
+            density_options,
+            index=(
+                density_options.index(
+                    current_settings.get(
+                        "display_density",
+                        "Comfortable"
+                    )
+                )
+                if current_settings.get(
+                    "display_density",
+                    "Comfortable"
+                ) in density_options
+                else 0
+            )
+        )
+
+        save_settings = st.form_submit_button(
+            "Save preferences",
+            use_container_width=True
+        )
+
+    if save_settings:
+
+        updated_settings = {
+            "preferred_language": preferred_language,
+            "display_density": display_density
+        }
+
+        save_json_file(
+            SETTINGS_FILE,
+            updated_settings
+        )
+
+        st.session_state.app_settings = updated_settings
+
+        st.success(
+            "Preferences saved. Display density will apply immediately after this refresh."
+        )
+
+        st.rerun()
+
+    st.markdown("---")
+    st.subheader("Application information")
+
+    info_col1, info_col2 = st.columns(2)
+
+    with info_col1:
+
+        st.write("**Application:** AgriSmart AI")
+        st.write("**Interface:** Streamlit")
+        st.write("**Crop model:** Random Forest Classifier")
+
+    with info_col2:
+
+        st.write("**Disease model:** MobileNetV2")
+        st.write("**Weather provider:** Open-Meteo")
+        st.write("**Market data:** Sample data / uploaded CSV")
+
+    st.caption(
+        "Punjabi and Hindi are listed as future language options; "
+        "the current interface is available in English. Preferences "
+        "are stored locally in data/app_settings.json."
+    )
+
+
+elif page == "❔ Help & Support":
+
+    section_heading(
+        "Help & Support",
+        "Quick guidance for using the agricultural decision-support tools."
+    )
+
+    with st.expander(
+        "How do I use Crop Recommendation?",
+        expanded=True
+    ):
+
+        st.write(
+            "Enter soil NPK values, temperature, humidity, soil pH "
+            "and rainfall. Submit the form to view the model's crop "
+            "prediction and top three class scores."
+        )
+
+    with st.expander("How do I use Disease Detection?"):
+
+        st.write(
+            "Upload a clear photograph of one leaf. The model predicts "
+            "one of its trained classes. Results are preliminary and "
+            "should be confirmed by an agricultural expert when "
+            "symptoms are serious."
+        )
+
+    with st.expander("How do I use Weather Advisory?"):
+
+        st.write(
+            "Enter a city name. The application retrieves weather "
+            "information through Open-Meteo and displays general "
+            "threshold-based alerts."
+        )
+
+    with st.expander("How do I use Market Analysis?"):
+
+        st.write(
+            "Use the demonstration dataset or upload a CSV containing "
+            "Crop, Mandi, Min Price, Max Price and Modal Price. "
+            "Built-in sample prices are illustrative, not live verified prices."
+        )
+
+    with st.expander("Are predictions guaranteed?"):
+
+        st.write(
+            "No. Models are decision-support tools. Dataset performance "
+            "does not guarantee results under real farm conditions. "
+            "Validate important decisions with local agricultural experts."
+        )
+
+
+# ============================================================
+# 17. ABOUT PROJECT
 # ============================================================
 
 elif page == "ℹ️ About Project":
@@ -2117,7 +2560,10 @@ elif page == "ℹ️ About Project":
         "Technology supporting smarter agricultural decisions."
     )
 
-    st.image(HERO_IMAGE, use_container_width=True)
+    st.image(
+        HERO_IMAGE,
+        use_container_width=True
+    )
 
     information_panel(
         "🎯 Project Objective",
@@ -2169,7 +2615,7 @@ elif page == "ℹ️ About Project":
 
 
 # ============================================================
-# 17. FOOTER
+# 18. FOOTER
 # ============================================================
 
 st.markdown(
